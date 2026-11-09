@@ -7,7 +7,7 @@ import { isFutureEvent } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cercle-echecs-spiceen.fr'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://echecs-lesepesses.fr'
 
 export const metadata: Metadata = {
   title: 'Événements & Agenda',
@@ -36,7 +36,7 @@ export default async function EvenementsPage() {
   const all = await getEvenements()
 
   const futurs = all.filter((e) => isFutureEvent(e.date))
-  const passes = all.filter((e) => !isFutureEvent(e.date))
+  const passes = all.filter((e) => !isFutureEvent(e.date)).sort((a, b) => b.date.localeCompare(a.date))
 
   const eventsJsonLd = futurs.map((event) => ({
     '@context': 'https://schema.org',

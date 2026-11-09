@@ -5,11 +5,14 @@ import { Users, GraduationCap, Trophy, School, ArrowRight, Gift } from 'lucide-r
 import SectionHeader from '@/components/SectionHeader'
 import ScheduleGrid from '@/components/ScheduleGrid'
 import ArticleCard from '@/components/ArticleCard'
-import { getHoraires, getArticles } from '@/lib/queries'
+import CompetitionArticleCard from '@/components/CompetitionArticleCard'
+import EventCard from '@/components/EventCard'
+import { getHoraires, getArticles, getCompetitionArticles, getEvenements } from '@/lib/queries'
+import { isFutureEvent } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cercle-echecs-spiceen.fr'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://echecs-lesepesses.fr'
 
 export const metadata: Metadata = {
   title: 'Club d\'échecs aux Epesses, Vendée — Cercle d\'Échecs Spicéen',
@@ -123,6 +126,13 @@ export default async function HomePage() {
   const horaires = await getHoraires()
 
   const latestArticles = (await getArticles()).slice(0, 3)
+
+  const latestCompetitionArticles = (await getCompetitionArticles()).slice(0, 3)
+
+  const upcomingEvents = (await getEvenements())
+    .filter((e) => isFutureEvent(e.date))
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 3)
 
   return (
     <>
@@ -258,32 +268,90 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* Blog — affiché seulement si des articles existent */}
-      {latestArticles.length > 0 && (
+      {/* Actualités — événements à venir et articles, affichés seulement si l'un des trois existe */}
+      {(upcomingEvents.length > 0 || latestArticles.length > 0 || latestCompetitionArticles.length > 0) && (
         <section className="py-20 bg-club-card">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-end justify-between mb-10">
-              <SectionHeader
-                label="Actualités"
-                title="Derniers articles"
-              />
-              <Link
-                href="/blog"
-                className="hidden sm:inline-flex items-center gap-2 text-club-gold text-sm font-semibold hover:gap-3 transition-all"
-              >
-                Tous les articles <ArrowRight size={14} aria-hidden="true" />
-              </Link>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-              {latestArticles.map((article) => (
-                <ArticleCard key={article.slug} article={article} />
-              ))}
-            </div>
-            <div className="mt-8 text-center sm:hidden">
-              <Link href="/blog" className="inline-flex items-center gap-2 text-club-gold text-sm font-semibold">
-                Tous les articles <ArrowRight size={14} aria-hidden="true" />
-              </Link>
-            </div>
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-16">
+            {upcomingEvents.length > 0 && (
+              <div>
+                <div className="flex items-end justify-between mb-10">
+                  <SectionHeader
+                    label="Actualités"
+                    title="Prochains événements"
+                  />
+                  <Link
+                    href="/evenements"
+                    className="hidden sm:inline-flex items-center gap-2 text-club-gold text-sm font-semibold hover:gap-3 transition-all"
+                  >
+                    Tout l&apos;agenda <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {upcomingEvents.map((event) => (
+                    <EventCard key={event.id} event={event} />
+                  ))}
+                </div>
+                <div className="mt-8 text-center sm:hidden">
+                  <Link href="/evenements" className="inline-flex items-center gap-2 text-club-gold text-sm font-semibold">
+                    Tout l&apos;agenda <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {latestArticles.length > 0 && (
+              <div>
+                <div className="flex items-end justify-between mb-10">
+                  <SectionHeader
+                    label={upcomingEvents.length === 0 ? 'Actualités' : undefined}
+                    title="Derniers articles"
+                  />
+                  <Link
+                    href="/blog"
+                    className="hidden sm:inline-flex items-center gap-2 text-club-gold text-sm font-semibold hover:gap-3 transition-all"
+                  >
+                    Tous les articles <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {latestArticles.map((article) => (
+                    <ArticleCard key={article.slug} article={article} />
+                  ))}
+                </div>
+                <div className="mt-8 text-center sm:hidden">
+                  <Link href="/blog" className="inline-flex items-center gap-2 text-club-gold text-sm font-semibold">
+                    Tous les articles <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            )}
+
+            {latestCompetitionArticles.length > 0 && (
+              <div>
+                <div className="flex items-end justify-between mb-10">
+                  <SectionHeader
+                    label={upcomingEvents.length === 0 && latestArticles.length === 0 ? 'Actualités' : undefined}
+                    title="Dernières actualités compétitions"
+                  />
+                  <Link
+                    href="/competitions"
+                    className="hidden sm:inline-flex items-center gap-2 text-club-gold text-sm font-semibold hover:gap-3 transition-all"
+                  >
+                    Toutes les compétitions <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {latestCompetitionArticles.map((article) => (
+                    <CompetitionArticleCard key={article.slug} article={article} />
+                  ))}
+                </div>
+                <div className="mt-8 text-center sm:hidden">
+                  <Link href="/competitions" className="inline-flex items-center gap-2 text-club-gold text-sm font-semibold">
+                    Toutes les compétitions <ArrowRight size={14} aria-hidden="true" />
+                  </Link>
+                </div>
+              </div>
+            )}
           </div>
         </section>
       )}

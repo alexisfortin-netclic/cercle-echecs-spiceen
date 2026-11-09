@@ -86,7 +86,7 @@ export default function Footer() {
             <ul className="flex flex-col gap-3 text-sm">
               <li className="flex items-start gap-2">
                 <MapPin size={16} className="text-club-gold mt-0.5 shrink-0" />
-                <span>Salle de la Colonne<br />Les Epesses, 85590</span>
+                <span>Les Epesses, 85590</span>
               </li>
               <li className="flex items-center gap-2">
                 <Phone size={16} className="text-club-gold shrink-0" />

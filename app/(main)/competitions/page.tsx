@@ -1,11 +1,12 @@
 import type { Metadata } from 'next'
 import { Trophy, TrendingUp } from 'lucide-react'
 import SectionHeader from '@/components/SectionHeader'
-import { getResultats } from '@/lib/queries'
+import CompetitionArticleCard from '@/components/CompetitionArticleCard'
+import { getResultats, getCompetitionArticles } from '@/lib/queries'
 
 export const dynamic = 'force-dynamic'
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://cercle-echecs-spiceen.fr'
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://echecs-lesepesses.fr'
 
 export const metadata: Metadata = {
   title: 'Compétitions & Résultats',
@@ -31,6 +32,7 @@ const resultLabel: Record<string, { label: string; className: string }> = {
 
 export default async function CompetitionsPage() {
   const resultats = await getResultats()
+  const articles = await getCompetitionArticles()
 
   const sportsEventJsonLd = resultats
     ? {
@@ -72,6 +74,17 @@ export default async function CompetitionsPage() {
             as="h1"
           />
         </div>
+
+        {articles.length > 0 && (
+          <div className="mb-16">
+            <SectionHeader label="Actualités" title="Récits de compétitions" />
+            <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+              {articles.map((article) => (
+                <CompetitionArticleCard key={article.slug} article={article} />
+              ))}
+            </div>
+          </div>
+        )}
 
         {!resultats ? (
           <div className="text-center py-20 text-club-gray">
